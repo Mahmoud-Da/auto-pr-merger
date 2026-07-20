@@ -43,11 +43,11 @@ For a dependent sequence such as `feature/49_1`, `feature/49_2`, and `feature/49
 # Explicit order is safest
 ./scripts/merge-series.sh feature/49_1 feature/49_2 feature/49_3
 
-# Or select every local branch with a common numbered prefix
+# Or select matching local branches from oldest commit to newest
 ./scripts/merge-series.sh --prefix feature/49_
 ```
 
-The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. Use `--merge squash` only when the selected branches are independent. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
+The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. With `--prefix`, branches are processed by their tip commit date from oldest to newest—not by their names. Use `--merge squash` only when the selected branches are independent. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
 
 ## Safety behavior
 
