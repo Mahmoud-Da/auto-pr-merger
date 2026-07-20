@@ -12,7 +12,7 @@ readonly AUTO_PR_SCRIPT="$SCRIPT_DIR/auto-pr.sh"
 BASE_BRANCH=""
 MERGE_METHOD="merge"
 BRANCH_PREFIX=""
-KEEP_BRANCH=false
+DELETE_BRANCH=false
 declare -a BRANCHES=()
 
 usage() {
@@ -27,7 +27,7 @@ Options:
   -b, --base BRANCH       Target branch (default: repository default branch)
   -m, --merge METHOD      Merge method: merge, squash, or rebase (default: merge)
   -p, --prefix PREFIX     Select local branches beginning with PREFIX, oldest commit first
-      --keep-branch       Keep merged local and remote feature branches
+      --delete-branches   Delete merged local and remote feature branches
   -h, --help              Show this help message
 
 Examples:
@@ -50,7 +50,7 @@ while (($#)); do
     -b|--base) BASE_BRANCH="${2:?Missing value for $1}"; shift 2 ;;
     -m|--merge) MERGE_METHOD="${2:?Missing value for $1}"; shift 2 ;;
     -p|--prefix) BRANCH_PREFIX="${2:?Missing value for $1}"; shift 2 ;;
-    --keep-branch) KEEP_BRANCH=true; shift ;;
+    --delete-branches) DELETE_BRANCH=true; shift ;;
     -h|--help) usage; exit 0 ;;
     --) shift; BRANCHES+=("$@"); break ;;
     -*) die "Unknown option: $1. Run '$PROGRAM_NAME --help' for usage." ;;
@@ -90,7 +90,7 @@ for index in "${!BRANCHES[@]}"; do
   git switch "$branch"
 
   auto_pr_args=(--base "$BASE_BRANCH" --merge "$MERGE_METHOD")
-  $KEEP_BRANCH && auto_pr_args+=(--keep-branch)
+  $DELETE_BRANCH && auto_pr_args+=(--delete-branch)
   "$AUTO_PR_SCRIPT" "${auto_pr_args[@]}"
 done
 
