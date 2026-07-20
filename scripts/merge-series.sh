@@ -26,7 +26,7 @@ Provide branches explicitly in their intended order, or select a numbered series
 Options:
   -b, --base BRANCH       Target branch (default: repository default branch)
   -m, --merge METHOD      Merge method: merge, squash, or rebase (default: merge)
-  -p, --prefix PREFIX     Select local branches beginning with PREFIX, natural-sorted
+  -p, --prefix PREFIX     Select local branches beginning with PREFIX, oldest commit first
       --keep-branch       Keep merged local and remote feature branches
   -h, --help              Show this help message
 
@@ -34,7 +34,7 @@ Examples:
   # Best for a dependent lesson sequence: preserves branch ancestry.
   $PROGRAM_NAME feature/49_1 feature/49_2 feature/49_3
 
-  # Select feature/49_1, feature/49_2, ... automatically.
+  # Select matching branches from oldest commit to newest automatically.
   $PROGRAM_NAME --prefix feature/49_
 
   # Independent branches can use squash merges.
@@ -70,7 +70,7 @@ git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Run this command ins
 if [[ -n "$BRANCH_PREFIX" ]]; then
   while IFS= read -r branch; do
     [[ -n "$branch" ]] && BRANCHES+=("$branch")
-  done < <(git for-each-ref --format='%(refname:short)' "refs/heads/$BRANCH_PREFIX*" | LC_ALL=C sort -V)
+  done < <(git for-each-ref --sort=committerdate --format='%(refname:short)' "refs/heads/$BRANCH_PREFIX*")
 fi
 (( ${#BRANCHES[@]} > 0 )) || die "No branches were selected."
 
