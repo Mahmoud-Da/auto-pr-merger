@@ -20,7 +20,7 @@ chmod +x scripts/auto-pr.sh
 ./scripts/auto-pr.sh
 ```
 
-The default target is the repository's default branch, the PR title is the latest commit subject, and the default merge strategy is **squash**. After a successful merge, the remote branch is deleted, the local default branch is fast-forwarded, and the local feature branch is deleted.
+The default target is the repository's default branch, the PR title is the latest commit subject, and the default merge strategy is **squash**. After a successful merge, the local default branch is fast-forwarded. Local and remote feature branches are retained by default.
 
 ```bash
 # Use a different base branch and merge strategy
@@ -31,6 +31,9 @@ The default target is the repository's default branch, the PR title is the lates
 
 # Let GitHub merge automatically once required checks/reviews pass
 ./scripts/auto-pr.sh --auto
+
+# Delete the merged feature branch locally and on GitHub
+./scripts/auto-pr.sh --delete-branch
 ```
 
 Run `./scripts/auto-pr.sh --help` for all options.
@@ -47,7 +50,7 @@ For a dependent sequence such as `feature/49_1`, `feature/49_2`, and `feature/49
 ./scripts/merge-series.sh --prefix feature/49_
 ```
 
-The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. With `--prefix`, branches are processed by their tip commit date from oldest to newest—not by their names. Use `--merge squash` only when the selected branches are independent. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
+The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. With `--prefix`, branches are processed by their tip commit date from oldest to newest—not by their names. Local and remote feature branches are retained; pass `--delete-branches` only if you want to remove them. Use `--merge squash` only when the selected branches are independent. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
 
 ## Safety behavior
 
@@ -55,7 +58,7 @@ The series runner defaults to `--merge merge`, rather than squash, because depen
 - Refuses a dirty working tree by default, preventing accidental cleanup of uncommitted work.
 - Reuses an existing open PR for the branch instead of creating a duplicate.
 - Verifies the PR state before local cleanup. With `--auto`, cleanup is intentionally deferred until GitHub has actually merged the PR.
-- Use `--keep-branch` to retain feature branches or `--allow-dirty` to push/create/merge without local cleanup.
+- Feature branches are retained by default. Use `--delete-branch` to delete them after a merge, or `--allow-dirty` to push/create/merge without local cleanup.
 
 ## Notes
 

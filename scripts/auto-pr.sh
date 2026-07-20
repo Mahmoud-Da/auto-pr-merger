@@ -11,7 +11,7 @@ MERGE_METHOD="squash"
 PR_TITLE=""
 PR_BODY=""
 AUTO_MERGE=false
-KEEP_BRANCH=false
+DELETE_BRANCH=false
 ALLOW_DIRTY=false
 
 usage() {
@@ -26,7 +26,7 @@ Options:
   -t, --title TITLE       Pull request title (default: latest commit subject)
       --body TEXT         Pull request body
       --auto              Enable GitHub auto-merge if required checks are pending
-      --keep-branch       Do not delete the merged local or remote branch
+      --delete-branch     Delete the merged local and remote branch
       --allow-dirty       Allow uncommitted changes; local cleanup is skipped
   -h, --help              Show this help message
 
@@ -47,7 +47,7 @@ while (($#)); do
     -t|--title) PR_TITLE="${2:?Missing value for $1}"; shift 2 ;;
     --body) PR_BODY="${2:?Missing value for $1}"; shift 2 ;;
     --auto) AUTO_MERGE=true; shift ;;
-    --keep-branch) KEEP_BRANCH=true; shift ;;
+    --delete-branch) DELETE_BRANCH=true; shift ;;
     --allow-dirty) ALLOW_DIRTY=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) die "Unknown option: $1. Run '$PROGRAM_NAME --help' for usage." ;;
@@ -96,7 +96,7 @@ fi
 
 log "Merging pull request with $MERGE_METHOD strategy"
 merge_args=(pr merge "$PR_URL" "--$MERGE_METHOD")
-$KEEP_BRANCH || merge_args+=(--delete-branch)
+$DELETE_BRANCH && merge_args+=(--delete-branch)
 $AUTO_MERGE && merge_args+=(--auto)
 gh "${merge_args[@]}"
 
@@ -115,7 +115,7 @@ log "Updating local $BASE_BRANCH"
 git switch "$BASE_BRANCH"
 git pull --ff-only origin "$BASE_BRANCH"
 
-if ! $KEEP_BRANCH; then
+if $DELETE_BRANCH; then
   log "Deleting local branch $CURRENT_BRANCH"
   git branch -d "$CURRENT_BRANCH" 2>/dev/null || \
     log "Local branch was already removed or needs manual cleanup."
