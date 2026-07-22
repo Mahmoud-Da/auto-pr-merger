@@ -74,7 +74,15 @@ if ! $ALLOW_DIRTY && [[ -n "$(git status --porcelain)" ]]; then
   die "Working tree has uncommitted changes. Commit/stash them or use --allow-dirty."
 fi
 
-PR_TITLE="${PR_TITLE:-$(git log -1 --pretty=%s)}"
+if [[ -z "$PR_TITLE" ]]; then
+  COMMIT_SUBJECT="$(git log -1 --pretty=%s)"
+  if [[ "$COMMIT_SUBJECT" =~ ^(.+)[[:space:]](-[[:space:]]*#[0-9]+)$ ]]; then
+    PR_TITLE="${BASH_REMATCH[1]}"
+    PR_BODY="${PR_BODY:-${BASH_REMATCH[2]}}"
+  else
+    PR_TITLE="$COMMIT_SUBJECT"
+  fi
+fi
 [[ -n "$PR_TITLE" ]] || die "Unable to determine a pull request title."
 
 log "Pushing $CURRENT_BRANCH to origin"

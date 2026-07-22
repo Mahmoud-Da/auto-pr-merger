@@ -20,7 +20,7 @@ chmod +x scripts/auto-pr.sh
 ./scripts/auto-pr.sh
 ```
 
-The default target is the repository's default branch, the PR title is the latest commit subject, and the default merge strategy is **squash**. After a successful merge, the local default branch is fast-forwarded. Local and remote feature branches are retained by default.
+The default target is the repository's default branch, the PR title is the latest commit subject, and the default merge strategy is **squash**. A trailing issue marker in the commit subject, such as `1- Introduction - #52`, is moved to the PR description: the title becomes `1- Introduction` and the body is `- #52`. After a successful merge, the local default branch is fast-forwarded. Local and remote feature branches are retained by default.
 
 ```bash
 # Use a different base branch and merge strategy
