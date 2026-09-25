@@ -32,6 +32,9 @@ The default target is the repository's default branch, the PR title is the lates
 # Let GitHub merge automatically once required checks/reviews pass
 ./scripts/auto-pr.sh --auto
 
+# Merge immediately with administrator privileges (bypasses branch protections)
+./scripts/auto-pr.sh --admin
+
 # Delete the merged feature branch locally and on GitHub
 ./scripts/auto-pr.sh --delete-branch
 ```
@@ -51,9 +54,12 @@ For a dependent sequence such as `feature/49_1`, `feature/49_2`, and `feature/49
 
 # Select a series and merge its pull requests into master
 ./scripts/merge-series.sh --base master --prefix feature/4_
+
+# Use administrator privileges for every merge in a series
+./scripts/merge-series.sh --base master --admin --prefix feature/144
 ```
 
-The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. With `--prefix`, branches are processed by their tip commit date from oldest to newest—not by their names. Local and remote feature branches are retained; pass `--delete-branches` only if you want to remove them. Use `--merge squash` only when the selected branches are independent. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
+The series runner defaults to `--merge merge`, rather than squash, because dependent branches share history. Keeping merge commits means the next PR contains only its new lesson. With `--prefix`, branches are processed by their tip commit date from oldest to newest—not by their names. Local and remote feature branches are retained; pass `--delete-branches` only if you want to remove them. Use `--merge squash` only when the selected branches are independent. Pass `--admin` only when you intentionally want every PR merged with administrator privileges. The runner stops at the first failure, leaving the repository on the affected branch so it can be fixed and rerun.
 
 ## Safety behavior
 
@@ -65,4 +71,4 @@ The series runner defaults to `--merge merge`, rather than squash, because depen
 
 ## Notes
 
-Repository branch-protection rules and GitHub merge settings still apply. If a PR requires checks or approvals, use `--auto` to enable GitHub auto-merge (when allowed), or merge it after those requirements pass and then update your branch manually.
+Repository branch-protection rules and GitHub merge settings still apply. If a PR requires checks or approvals, use `--auto` to enable GitHub auto-merge (when allowed), or merge it after those requirements pass and then update your branch manually. If your GitHub account has the required permissions and you intentionally need to bypass those policies, use `--admin`. It cannot be combined with `--auto`.

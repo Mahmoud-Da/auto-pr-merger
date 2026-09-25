@@ -11,6 +11,7 @@ MERGE_METHOD="squash"
 PR_TITLE=""
 PR_BODY=""
 AUTO_MERGE=false
+ADMIN_MERGE=false
 DELETE_BRANCH=false
 ALLOW_DIRTY=false
 
@@ -26,6 +27,7 @@ Options:
   -t, --title TITLE       Pull request title (default: latest commit subject)
       --body TEXT         Pull request body
       --auto              Enable GitHub auto-merge if required checks are pending
+      --admin             Merge with GitHub administrator privileges, bypassing policies
       --delete-branch     Delete the merged local and remote branch
       --allow-dirty       Allow uncommitted changes; local cleanup is skipped
   -h, --help              Show this help message
@@ -47,6 +49,7 @@ while (($#)); do
     -t|--title) PR_TITLE="${2:?Missing value for $1}"; shift 2 ;;
     --body) PR_BODY="${2:?Missing value for $1}"; shift 2 ;;
     --auto) AUTO_MERGE=true; shift ;;
+    --admin) ADMIN_MERGE=true; shift ;;
     --delete-branch) DELETE_BRANCH=true; shift ;;
     --allow-dirty) ALLOW_DIRTY=true; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -55,6 +58,7 @@ while (($#)); do
 done
 
 case "$MERGE_METHOD" in merge|squash|rebase) ;; *) die "Merge method must be merge, squash, or rebase." ;; esac
+$AUTO_MERGE && $ADMIN_MERGE && die "--auto and --admin cannot be used together."
 
 command -v git >/dev/null || die "git is required."
 command -v gh >/dev/null || die "GitHub CLI (gh) is required: https://cli.github.com/"
@@ -106,6 +110,7 @@ log "Merging pull request with $MERGE_METHOD strategy"
 merge_args=(pr merge "$PR_URL" "--$MERGE_METHOD")
 $DELETE_BRANCH && merge_args+=(--delete-branch)
 $AUTO_MERGE && merge_args+=(--auto)
+$ADMIN_MERGE && merge_args+=(--admin)
 gh "${merge_args[@]}"
 
 PR_STATE="$(gh pr view "$PR_URL" --json state --jq .state)"
